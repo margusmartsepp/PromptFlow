@@ -101,6 +101,15 @@ export const useEditor = ({ initialPromptId, onNavigate }: UseEditorProps) => {
     input$.current.next(newContent);
   }, []);
 
+  const handleUpdateTags = async (newTags: string[]) => {
+    if (!activePrompt) return;
+    const updated = { ...activePrompt, tags: newTags, updatedAt: Date.now() };
+    setActivePrompt(updated);
+    // Don't need to trigger full save status for tags, just silent update
+    await updatePrompt(activePrompt.id, { tags: newTags });
+    setStatus('saved');
+  };
+
   const handleApplySuggestion = async (text: string, type: 'continuation' | 'enhancement') => {
     if (!activePrompt) return;
 
@@ -167,6 +176,7 @@ export const useEditor = ({ initialPromptId, onNavigate }: UseEditorProps) => {
     aiStatus,
     suggestions,
     handleInput,
+    handleUpdateTags,
     handleApplySuggestion,
     handleRestoreVersion,
     handleKeyDown,

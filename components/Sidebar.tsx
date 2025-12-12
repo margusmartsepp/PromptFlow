@@ -33,7 +33,8 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const filtered = prompts.filter(p => 
     p.title.toLowerCase().includes(search.toLowerCase()) || 
-    p.content.toLowerCase().includes(search.toLowerCase())
+    p.content.toLowerCase().includes(search.toLowerCase()) ||
+    p.tags?.some(t => t.toLowerCase().includes(search.toLowerCase()))
   );
 
   const handleDelete = async (e: React.MouseEvent, id: string) => {
@@ -63,7 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </button>
 
       <div className={clsx(
-        "fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 z-40",
+        "fixed inset-y-0 left-0 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col transition-transform duration-300 z-40 shadow-xl lg:shadow-none",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         className
       )}>
@@ -87,7 +88,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
             <input 
               type="text" 
-              placeholder="Search prompts..." 
+              placeholder="Search by title or tag..." 
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 bg-slate-50 dark:bg-slate-800 border border-transparent focus:border-indigo-500 rounded-md text-sm outline-none transition-all text-slate-700 dark:text-slate-300"
@@ -124,10 +125,23 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   )}>
                     {p.title || 'Untitled'}
                   </h3>
+                  
+                  {/* Tags Row */}
+                  {p.tags && p.tags.length > 0 && (
+                     <div className="flex flex-wrap gap-1 mt-1.5 mb-0.5">
+                       {p.tags.slice(0, 3).map(tag => (
+                         <span key={tag} className="text-[10px] px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-full">
+                           {tag}
+                         </span>
+                       ))}
+                       {p.tags.length > 3 && <span className="text-[10px] text-slate-400">+{p.tags.length - 3}</span>}
+                     </div>
+                  )}
+
                   <p className="text-xs text-slate-400 mt-1 flex items-center gap-2 truncate">
                     <span>{formatDate(p.updatedAt)}</span>
                     <span className="w-1 h-1 rounded-full bg-slate-300"></span>
-                    <span className="truncate max-w-[80px]">{p.content.slice(0, 15)}...</span>
+                    <span className="truncate max-w-[80px] opacity-70">{p.content.slice(0, 15)}...</span>
                   </p>
                 </div>
                 <button 

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { PromptVersion } from '../types';
 import { getVersions } from '../lib/db';
-import { X, Clock, RotateCcw, GitCommit } from 'lucide-react';
+import { X, Clock, RotateCcw, GitCommit, Split } from 'lucide-react';
+import { DiffViewer } from './DiffViewer';
 import clsx from 'clsx';
 
 interface VersionHistoryModalProps {
@@ -21,6 +22,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
 }) => {
   const [versions, setVersions] = useState<PromptVersion[]>([]);
   const [selectedVersion, setSelectedVersion] = useState<PromptVersion | null>(null);
+  const [showDiff, setShowDiff] = useState(false);
 
   useEffect(() => {
     if (isOpen && promptId) {
@@ -34,6 +36,11 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
       setSelectedVersion(versions[0]);
     }
   }, [versions]);
+
+  // Reset diff toggle when reopening
+  useEffect(() => {
+    if (isOpen) setShowDiff(false);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -52,10 +59,10 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
       />
 
       {/* Modal Content */}
-      <div className="relative w-full max-w-4xl h-[80vh] bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex overflow-hidden border border-slate-200 dark:border-slate-800">
+      <div className="relative w-full max-w-5xl h-[85vh] bg-white dark:bg-slate-900 rounded-xl shadow-2xl flex overflow-hidden border border-slate-200 dark:border-slate-800">
         
         {/* Sidebar: List of Versions */}
-        <div className="w-1/3 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900/50">
+        <div className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50 dark:bg-slate-900/50 flex-shrink-0">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <h2 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <Clock size={18} className="text-slate-500" />
@@ -70,7 +77,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
             ) : (
               <div className="divide-y divide-slate-100 dark:divide-slate-800/50">
                 {/* Current State Indicator */}
-                <div className="p-3 bg-indigo-50/50 dark:bg-indigo-900/10">
+                <div className="p-3 bg-indigo-50/50 dark:bg-indigo-900/10 border-l-4 border-transparent">
                   <div className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide mb-1">
                     Current Editing
                   </div>
@@ -84,8 +91,10 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                     key={v.id}
                     onClick={() => setSelectedVersion(v)}
                     className={clsx(
-                      "w-full text-left p-4 transition-colors hover:bg-white dark:hover:bg-slate-800",
-                      selectedVersion?.id === v.id ? "bg-white dark:bg-slate-800 border-l-4 border-indigo-500 shadow-sm" : "border-l-4 border-transparent"
+                      "w-full text-left p-4 transition-all duration-200",
+                      selectedVersion?.id === v.id 
+                        ? "bg-white dark:bg-slate-800 border-l-4 border-indigo-500 shadow-sm" 
+                        : "border-l-4 border-transparent hover:bg-white dark:hover:bg-slate-800"
                     )}
                   >
                     <div className="flex items-start justify-between mb-1">
@@ -96,7 +105,7 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
                     <p className="text-sm font-medium text-slate-700 dark:text-slate-200 mb-1">
                       {v.changeDescription || 'Auto-save'}
                     </p>
-                    <p className="text-xs text-slate-500 truncate font-mono">
+                    <p className="text-xs text-slate-500 truncate font-mono opacity-70">
                       {v.content.slice(0, 30)}...
                     </p>
                   </button>
@@ -107,12 +116,39 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
         </div>
 
         {/* Main Area: Preview */}
-        <div className="flex-1 flex flex-col bg-white dark:bg-slate-950">
-          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <GitCommit size={16} />
-              <span>Previewing version content</span>
+        <div className="flex-1 flex flex-col bg-white dark:bg-slate-950 min-w-0">
+          <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-2 text-sm text-slate-500">
+                <GitCommit size={16} />
+                <span className="hidden sm:inline">Selected Version Preview</span>
+              </div>
+              
+              {selectedVersion && (
+                <div className="flex items-center bg-slate-100 dark:bg-slate-800 rounded-lg p-0.5">
+                    <button 
+                      onClick={() => setShowDiff(false)}
+                      className={clsx(
+                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all",
+                        !showDiff ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      )}
+                    >
+                      View
+                    </button>
+                    <button 
+                      onClick={() => setShowDiff(true)}
+                      className={clsx(
+                        "px-3 py-1.5 text-xs font-medium rounded-md transition-all flex items-center gap-1.5",
+                        showDiff ? "bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-300 shadow-sm" : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                      )}
+                    >
+                      <Split size={12} />
+                      Compare with Current
+                    </button>
+                </div>
+              )}
             </div>
+
             <button 
               onClick={onClose}
               className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
@@ -121,19 +157,29 @@ export const VersionHistoryModal: React.FC<VersionHistoryModalProps> = ({
             </button>
           </div>
 
-          <div className="flex-1 overflow-auto p-6 bg-slate-50/50 dark:bg-slate-950">
+          <div className="flex-1 overflow-auto p-8 bg-slate-50/50 dark:bg-slate-950">
             {selectedVersion ? (
-              <pre className="whitespace-pre-wrap font-sans text-base text-slate-800 dark:text-slate-200 leading-relaxed max-w-none">
-                {selectedVersion.content}
-              </pre>
+              showDiff ? (
+                <div className="animate-in fade-in duration-200">
+                   <div className="mb-4 text-xs text-slate-400 flex items-center gap-4">
+                      <span className="flex items-center gap-1"><div className="w-2 h-2 bg-red-200 rounded-full"></div>Removed from current</span>
+                      <span className="flex items-center gap-1"><div className="w-2 h-2 bg-green-200 rounded-full"></div>Added from version</span>
+                   </div>
+                   <DiffViewer oldText={currentContent} newText={selectedVersion.content} />
+                </div>
+              ) : (
+                <pre className="whitespace-pre-wrap font-sans text-base text-slate-800 dark:text-slate-200 leading-relaxed max-w-none animate-in fade-in duration-200">
+                  {selectedVersion.content}
+                </pre>
+              )
             ) : (
               <div className="h-full flex items-center justify-center text-slate-400 text-sm">
-                Select a version to preview
+                Select a version from the history sidebar
               </div>
             )}
           </div>
 
-          <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end gap-3">
+          <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex justify-end gap-3 z-10">
             <button 
               onClick={onClose}
               className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
