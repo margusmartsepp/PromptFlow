@@ -1,0 +1,5 @@
+{
+  "name": "PromptFlow AI",
+  "description": "A production-grade prompt enhancement tool featuring local persistence, reactive AI assistance, and version control.",
+  "requestFramePermissions": []
+}
