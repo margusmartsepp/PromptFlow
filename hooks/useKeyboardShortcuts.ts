@@ -9,9 +9,8 @@ interface ShortcutConfig {
 export const useKeyboardShortcuts = (shortcuts: ShortcutConfig[]) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ignore if input/textarea is focused (unless it's a command like Save)
-      // But for global commands like New Prompt, we usually want them to work everywhere
-      // except maybe if they conflict with typing.
+      // Allow shortcuts to trigger even if focused on inputs for global commands (like Cmd+S, Cmd+N)
+      // but prevent default browser behaviors
       
       const isCtrlOrMeta = e.ctrlKey || e.metaKey;
 

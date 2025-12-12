@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { EditorStatus } from '../types';
 import clsx from 'clsx';
-import { CheckCircle, Cloud, Loader2, AlertCircle, History, Copy, Download, Check, Tag, Plus, X, Command } from 'lucide-react';
+import { CheckCircle, Cloud, Loader2, AlertCircle, History, Copy, Download, Check, Tag, Plus, X } from 'lucide-react';
 
 interface EditorProps {
   content: string;
@@ -30,13 +30,15 @@ export const Editor: React.FC<EditorProps> = ({
   const [isTagInputVisible, setIsTagInputVisible] = useState(false);
   const [tagInput, setTagInput] = useState('');
   const tagInputRef = useRef<HTMLInputElement>(null);
+  
+  // Refs for scroll sync
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const backdropRef = useRef<HTMLDivElement>(null);
 
-  // Sync scroll between textarea and backdrop
   const handleScroll = () => {
     if (textareaRef.current && backdropRef.current) {
       backdropRef.current.scrollTop = textareaRef.current.scrollTop;
+      backdropRef.current.scrollLeft = textareaRef.current.scrollLeft;
     }
   };
 
@@ -80,12 +82,12 @@ export const Editor: React.FC<EditorProps> = ({
     }
   };
 
-  // Common font styles to ensure perfect alignment
-  const fontStyles = "font-sans text-lg leading-relaxed";
+  // Shared typography styles to ensure exact overlay matching
+  const typographyStyles = "font-sans text-lg leading-relaxed tracking-normal";
 
   return (
     <div className="flex-1 flex flex-col h-full bg-white dark:bg-slate-950 relative">
-      {/* Top Bar */}
+      {/* Top Bar for Status */}
       <div className="h-14 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between px-6 bg-white/50 dark:bg-slate-950/50 backdrop-blur-sm z-20">
         <div className="flex items-center gap-2">
            <button 
@@ -115,7 +117,7 @@ export const Editor: React.FC<EditorProps> = ({
 
            {/* Tags Section */}
            <div className="h-4 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-           <div className="flex items-center gap-2 max-w-[200px] overflow-hidden">
+           <div className="flex items-center gap-2 overflow-x-auto no-scrollbar max-w-[150px] sm:max-w-xs">
              {tags.map(tag => (
                <span key={tag} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-xs font-medium text-indigo-700 dark:text-indigo-300 border border-indigo-100 dark:border-indigo-500/30 whitespace-nowrap">
                  {tag}
@@ -192,34 +194,34 @@ export const Editor: React.FC<EditorProps> = ({
         </div>
       </div>
 
-      {/* Editor Container with Ghost Text Overlay */}
+      {/* Textarea Container */}
       <div className="flex-1 relative overflow-hidden">
-        <div className="max-w-3xl mx-auto h-full px-8 py-10 relative">
+        <div className="max-w-3xl mx-auto h-full px-4 sm:px-8 py-10 relative">
           
-          {/* 1. Ghost Text Backdrop (Rendered behind) */}
+          {/* Ghost Text Overlay Layer */}
           <div 
             ref={backdropRef}
             aria-hidden="true"
             className={clsx(
-              "absolute inset-0 px-8 py-10 pointer-events-none z-0 whitespace-pre-wrap break-words overflow-auto scrollbar-hide",
-              fontStyles
+              "absolute inset-0 px-4 sm:px-8 py-10 pointer-events-none whitespace-pre-wrap break-words overflow-auto scrollbar-hide z-0",
+              typographyStyles
             )}
           >
-            {/* Render invisible content to push ghost text to correct position */}
+            {/* Render invisible content to push the ghost text to the right position */}
             <span className="text-transparent selection:bg-indigo-200 dark:selection:bg-indigo-900">
               {content}
             </span>
-            {/* Render ghost text if available */}
+            {/* Render the ghost text in gray */}
             {ghostText && (
               <span className="text-slate-400 dark:text-slate-500 opacity-60 transition-opacity duration-300">
                 {ghostText}
               </span>
             )}
-             {/* Extra space at bottom to match textarea behavior */}
-             <br /><br /><br />
+            {/* Add extra break to ensure scroll alignment matches textarea */}
+            <br /><br /><br />
           </div>
 
-          {/* 2. Actual Textarea */}
+          {/* Actual Input Layer */}
           <textarea
             ref={textareaRef}
             value={content}
@@ -228,20 +230,20 @@ export const Editor: React.FC<EditorProps> = ({
             onScroll={handleScroll}
             placeholder="Start writing your prompt here..."
             className={clsx(
-              "w-full h-full resize-none outline-none bg-transparent relative z-10",
-              "text-slate-800 dark:text-slate-200 placeholder-slate-300 dark:placeholder-slate-700",
-              fontStyles
+              "w-full h-full resize-none outline-none bg-transparent placeholder-slate-300 dark:placeholder-slate-700 relative z-10",
+              "text-slate-800 dark:text-slate-200",
+              typographyStyles
             )}
             spellCheck={false}
           />
-          
-          {/* Floating 'Tab' hint if ghost text is present */}
+
+          {/* Tab Hint */}
           {ghostText && (
-            <div className="absolute bottom-6 right-8 pointer-events-none z-20 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-[10px] font-medium text-slate-500 dark:text-slate-400 shadow-sm">
-                Press <span className="px-1 py-0.5 bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 text-xs font-mono text-slate-700 dark:text-slate-200">Tab</span> to accept
-              </span>
-            </div>
+             <div className="absolute bottom-6 right-8 z-30 animate-in fade-in slide-in-from-bottom-2 duration-500 pointer-events-none">
+               <span className="inline-flex items-center gap-1.5 px-2 py-1 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded text-[10px] font-medium text-slate-500 dark:text-slate-400 shadow-sm">
+                 Press <span className="px-1 py-0.5 bg-white dark:bg-slate-700 rounded border border-slate-300 dark:border-slate-600 font-mono text-slate-700 dark:text-slate-200">Tab</span> to accept
+               </span>
+             </div>
           )}
         </div>
       </div>

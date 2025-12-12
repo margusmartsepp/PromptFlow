@@ -30,7 +30,7 @@ export default function App() {
       window.location.hash = `/prompt/${id}`;
       setCurrentPromptId(id);
     }
-    // Close mobile panels on nav
+    // Close mobile panel on navigate
     setIsMobileAiOpen(false);
   }, []);
 
@@ -74,11 +74,6 @@ export default function App() {
       key: 'h',
       ctrlOrMeta: true,
       handler: () => setIsHistoryOpen(prev => !prev)
-    },
-    {
-      key: '/',
-      ctrlOrMeta: true,
-      handler: () => setIsMobileAiOpen(prev => !prev) // On desktop this could focus panel, simpler for now
     },
     {
       key: ',',
@@ -127,8 +122,8 @@ export default function App() {
               </p>
             </div>
             <div className="grid grid-cols-2 gap-4 text-left text-sm text-slate-500 max-w-xs mx-auto mb-6">
-                <div className="flex items-center gap-2"><span className="p-1 bg-slate-200 dark:bg-slate-800 rounded">Cmd+N</span> New</div>
-                <div className="flex items-center gap-2"><span className="p-1 bg-slate-200 dark:bg-slate-800 rounded">Cmd+H</span> History</div>
+                <div className="flex items-center gap-2"><span className="p-1 bg-slate-200 dark:bg-slate-800 rounded min-w-[3rem] text-center">Cmd+N</span> New</div>
+                <div className="flex items-center gap-2"><span className="p-1 bg-slate-200 dark:bg-slate-800 rounded min-w-[3rem] text-center">Cmd+H</span> History</div>
             </div>
             <button 
               onClick={createNewPrompt}
@@ -182,10 +177,11 @@ export default function App() {
           />
         </div>
 
-        {/* Mobile AI Toggle Button (FAB) */}
+        {/* Mobile AI Toggle Button (Floating Action Button) */}
         <button
           onClick={() => setIsMobileAiOpen(true)}
           className="xl:hidden fixed bottom-6 right-6 h-14 w-14 bg-indigo-600 text-white rounded-full shadow-xl shadow-indigo-500/40 flex items-center justify-center z-30 hover:scale-105 transition-transform"
+          aria-label="Open AI Suggestions"
         >
           <Sparkles size={24} />
           {aiStatus === 'thinking' && (

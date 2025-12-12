@@ -16,7 +16,7 @@ export const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({
   status, 
   onApply,
   isOpenMobile,
-  onCloseMobile 
+  onCloseMobile
 }) => {
   const hasContent = suggestions.continuations.length > 0 || suggestions.enhancements.length > 0;
 
@@ -25,7 +25,7 @@ export const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({
       {/* Mobile Backdrop */}
       {isOpenMobile && (
         <div 
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 xl:hidden" 
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 xl:hidden"
           onClick={onCloseMobile}
         />
       )}
@@ -33,6 +33,7 @@ export const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({
       {/* Panel */}
       <div className={clsx(
         "fixed xl:relative inset-y-0 right-0 w-80 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col overflow-hidden transition-transform duration-300 z-50",
+        // Mobile: slide in from right. Desktop: always show.
         isOpenMobile ? "translate-x-0" : "translate-x-full xl:translate-x-0"
       )}>
         <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
@@ -83,7 +84,7 @@ export const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({
                   key={i}
                   onClick={() => {
                     onApply(text, 'continuation');
-                    if (onCloseMobile) onCloseMobile();
+                    if(onCloseMobile) onCloseMobile();
                   }}
                   className="w-full text-left p-3 rounded-lg border border-slate-200 dark:border-slate-700 hover:border-indigo-400 dark:hover:border-indigo-500 hover:shadow-sm bg-slate-50 dark:bg-slate-800/50 transition-all group"
                 >
@@ -116,7 +117,7 @@ export const SuggestionsPanel: React.FC<SuggestionsPanelProps> = ({
                   <button
                     onClick={() => {
                       onApply(text, 'enhancement');
-                      if (onCloseMobile) onCloseMobile();
+                      if(onCloseMobile) onCloseMobile();
                     }}
                     className="mt-3 w-full py-1.5 px-3 bg-white dark:bg-slate-800 border border-purple-200 dark:border-purple-800 rounded text-xs font-medium text-purple-700 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
                   >
